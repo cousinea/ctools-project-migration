@@ -25,6 +25,8 @@ WORKDIR /usr/local/tomcat/webapps
 EXPOSE 8080
 EXPOSE 8009
 
+RUN mkdir /usr/local/tomcat/home/
+
 # Launch Tomcat
 CMD cp /tmp/cpm-props/* /usr/local/tomcat/home/; catalina.sh run
 #CMD /bin/bash
