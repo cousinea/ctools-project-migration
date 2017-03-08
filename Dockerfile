@@ -26,5 +26,5 @@ EXPOSE 8080
 EXPOSE 8009
 
 # Launch Tomcat
-CMD cp /usr/share/ccm/props/* /usr/local/tomcat/home/; catalina.sh run
+CMD cp /tmp/cpm-props/* /usr/local/tomcat/home/; catalina.sh run
 #CMD /bin/bash
