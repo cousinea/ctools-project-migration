@@ -1,0 +1,68 @@
+FROM ubuntu:16.04
+
+MAINTAINER Chris Kretler <ckretler@umich.edu>
+
+ENV TOMCAT_VERSION 8.0.36
+
+# Install dependencies
+RUN apt-get update && \
+apt-get install -y git build-essential curl wget software-properties-common maven
+
+# Install JDK 8
+RUN \
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+add-apt-repository -y ppa:webupd8team/java && \
+apt-get update && \
+apt-get install -y oracle-java8-installer unzip tar && \
+rm -rf /var/lib/apt/lists/* && \
+rm -rf /var/cache/oracle-jdk8-installer
+
+# Define commonly used JAVA_HOME variable
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
+# Get Tomcat
+RUN wget --quiet --no-cookies http://apache.rediris.es/tomcat/tomcat-8/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /tmp/tomcat.tgz && \
+tar xzvf /tmp/tomcat.tgz -C /opt && \
+mv /opt/apache-tomcat-${TOMCAT_VERSION} /opt/tomcat && \
+rm /tmp/tomcat.tgz && \
+rm -rf /opt/tomcat/webapps/examples && \
+rm -rf /opt/tomcat/webapps/docs && \
+rm -rf /opt/tomcat/webapps/ROOT
+
+# Add admin/admin user
+ADD tomcat-users.xml /opt/tomcat/conf/
+
+# Copy CPM build artifacts to tomcat directory
+WORKDIR /tmp
+COPY . /tmp
+
+# Build the app
+RUN mvn package
+
+# move package to tomcat directory
+RUN mv /tmp/target/ctools-project-migration-0.1.0.war /opt/tomcat/webapps/ctools-project-migration.war
+
+# remove dependencies
+# RUN apt-get remove -y maven git build-essential curl wget software-properties-common \
+RUN apt-get remove -y maven git build-essential curl software-properties-common \
+ && apt-get autoremove -y
+
+RUN rm -r /tmp
+
+ENV JAVA_OPTS="-server \
+-Xmx1028m \
+-Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false \
+-Djava.awt.headless=true -Dcom.sun.management.jmxremote \
+-Dsun.lang.ClassLoader.allowArraySyntax=true \
+-Dfile.encoding=UTF-8 \
+-DccmPropsPathSecure=ccmPropsPathSecure=$CATALINA_HOME/conf/ccmSecure.properties \
+-DccmPropsPath=ccmPropsPath=$CATALINA_HOME/conf/ccm.properties \
+"
+
+EXPOSE 8080
+EXPOSE 8009
+
+# Launch Tomcat
+#CMD cp /usr/share/ccm/props/* /usr/local/tomcat/conf/; catalina.sh run
+CMD /opt/tomcat/bin/catalina.sh run
+#CMD /bin/sh
