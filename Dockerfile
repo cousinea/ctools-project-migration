@@ -28,5 +28,5 @@ EXPOSE 8009
 RUN mkdir /usr/local/tomcat/home/
 
 # Launch Tomcat
-CMD cp /tmp/cpm-props/* /usr/local/tomcat/home/; catalina.sh run
+CMD cp /tmp/cpm-props/* /usr/local/tomcat/home/; cp /tmp/jdbc-driver/* /usr/local/tomcat/lib/; catalina.sh run
 #CMD /bin/bash
