@@ -22,6 +22,8 @@ RUN apt-get remove -y maven openjdk-8-jdk git \
 
 WORKDIR /usr/local/tomcat/webapps
 
+RUN rm -rf ROOT
+
 EXPOSE 8080
 EXPOSE 8009
 
