@@ -22,7 +22,7 @@ RUN apt-get remove -y maven openjdk-8-jdk git \
 
 WORKDIR /usr/local/tomcat/webapps
 
-RUN rm -rf ROOT
+RUN rm -rf ROOT docs examples host-manager manager
 
 EXPOSE 8080
 EXPOSE 8009
